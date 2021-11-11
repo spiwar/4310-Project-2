@@ -30,6 +30,7 @@ credit_filtered$NAME_TYPE_SUITE <- as.factor(credit_filtered$NAME_TYPE_SUITE)
 credit_filtered$NAME_EDUCATION_TYPE <- as.factor(credit_filtered$NAME_EDUCATION_TYPE)
 credit_filtered$NAME_FAMILY_STATUS <- as.factor(credit_filtered$NAME_FAMILY_STATUS)
 credit_filtered$NAME_HOUSING_TYPE <- as.factor(credit_filtered$NAME_HOUSING_TYPE)
+credit_filtered$NAME_INCOME_TYPE <- as.factor(credit_filtered$NAME_INCOME_TYPE)
 credit_filtered$OCCUPATION_TYPE <- as.factor(credit_filtered$OCCUPATION_TYPE)
 credit_filtered$ORGANIZATION_TYPE <- as.factor(credit_filtered$ORGANIZATION_TYPE)
 
@@ -54,7 +55,11 @@ valid_df <- credit_filtered[valid_index, ]
 nrow(train_df)
 nrow(valid_df)
 
+library(janitor)
+compare_df_cols(train_df, valid_df)
+
 library(ROSE)
+
 train_df_balance <- ROSE(TARGET ~ SK_ID_CURR + NAME_CONTRACT_TYPE + CODE_GENDER + FLAG_OWN_CAR + FLAG_OWN_REALTY
                          + CNT_CHILDREN + AMT_INCOME_TOTAL + AMT_CREDIT + AMT_ANNUITY
                          + AMT_GOODS_PRICE + NAME_TYPE_SUITE + NAME_INCOME_TYPE + NAME_EDUCATION_TYPE +
@@ -64,9 +69,10 @@ train_df_balance <- ROSE(TARGET ~ SK_ID_CURR + NAME_CONTRACT_TYPE + CODE_GENDER 
                            REG_CITY_NOT_LIVE_CITY + REG_CITY_NOT_WORK_CITY + LIVE_CITY_NOT_WORK_CITY + 
                            ORGANIZATION_TYPE + AMT_REQ_CREDIT_BUREAU_HOUR + AMT_REQ_CREDIT_BUREAU_DAY + 
                            AMT_REQ_CREDIT_BUREAU_WEEK + AMT_REQ_CREDIT_BUREAU_MON + AMT_REQ_CREDIT_BUREAU_QRT +
-                           AMT_REQ_CREDIT_BUREAU_YEAR, data = train_df, seed = 12345)$credit_filtered
+                           AMT_REQ_CREDIT_BUREAU_YEAR, data = train_df, seed = 666)$credit_filtered
 
-par(mar=c(1,1,1,1))
+
+#par(mar=c(1,1,1,1))
 class_tr <- rpart(TARGET ~ SK_ID_CURR + NAME_CONTRACT_TYPE + CODE_GENDER + FLAG_OWN_CAR + FLAG_OWN_REALTY
                   + CNT_CHILDREN + AMT_INCOME_TOTAL + AMT_CREDIT + AMT_ANNUITY
                   + AMT_GOODS_PRICE + NAME_TYPE_SUITE + NAME_INCOME_TYPE + NAME_EDUCATION_TYPE +
@@ -77,5 +83,5 @@ class_tr <- rpart(TARGET ~ SK_ID_CURR + NAME_CONTRACT_TYPE + CODE_GENDER + FLAG_
                     ORGANIZATION_TYPE + AMT_REQ_CREDIT_BUREAU_HOUR + AMT_REQ_CREDIT_BUREAU_DAY + 
                     AMT_REQ_CREDIT_BUREAU_WEEK + AMT_REQ_CREDIT_BUREAU_MON + AMT_REQ_CREDIT_BUREAU_QRT +
                     AMT_REQ_CREDIT_BUREAU_YEAR,
-                  data = train_df, method = "class", minbucket = 5,maxdepth = 10)
+                  data = train_df_balance, method = "class", minbucket = 5,maxdepth = 10)
 prp(class_tr, cex = 0.8, tweak = 1)
