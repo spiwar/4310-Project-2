@@ -57,11 +57,11 @@ library(janitor)
 compare_df_cols(train_df, valid_df)
 
 library(ROSE)
-train_df_balance <- ROSE(TARGET ~ ., data = train_df, seed = 666)$credit_filtered
+train_df_balance <- ROSE(TARGET ~ ., data = train_df, seed = 666)$data
 
 par(mar=c(1,1,1,1))
 class_tr <- rpart(TARGET ~.,
-                  data = train_df, method = "class", minbucket = 5,maxdepth = 10)
+                  data = train_df_balance, method = "class", minbucket = 5,maxdepth = 10)
 prp(class_tr, cex = 0.8, tweak = 1)
 
 
