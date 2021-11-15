@@ -257,7 +257,8 @@ ID_405632_pred
 # Discussion & Final Recommendation ------------------------------------------------------------
 #
 # Our final model was fairly accurate, as both the training and validation accuracy was fairly decent (67%)
-# However, The sensitivity, as well as the ROC curve has room for improvements.
+# However, The sensitivity, as well as the ROC curve has room for improvements. The model's accuracy rate could be improved by
+# choosing variables that are more correlated to the outcome variable (TARGET).
 # Overall, we feel that the model is decent and can be used in real-world situations.
 #
 #---------------------------------------------------------------------------------------------
