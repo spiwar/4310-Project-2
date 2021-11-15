@@ -1,14 +1,15 @@
-# Problem 2 Stark Inc. Introduction
+# Problem 2 Stark Inc. Introduction:
 # After Steve Rogers replaced the Infinity Stones, Stark Enterprises has branched into the financial industry.
 # Perhaps Steve Rogers changed something when he traveled back in time 2. Since Mr. Stark is on a different 
 # timeline, they are short of analogical power. They would like to build a model and predict which customers
 # are likely to have high risk. 
 
+# Objectives:
 # Regarding this problem, we will analyze a sample of the larger dataset 'credit_2.csv'. Based on the dataset, 
 # we will build and select an appropriate model for the company and predict the risk at the target variable 
 # of the new customers which was given in 'credit_test_2.csv'.
 
-# Data Description
+# Data Description:
 # The credit_2 dataset represents ten of thousands information from customers, which includes some key variables
 # like income, gender, education level, age, housing situation, family status, loan amount, and occupation. 
 
@@ -20,14 +21,19 @@ library(rpart.plot)
 library(forecast)
 library(caret)
 library(ISLR)
-data(package="ISLR")
 require(tree)
 library(tidyr)
 library(dplyr)
+library(janitor)
+library(ROSE)
 
 # Data import and transformation ---------------------------------------------
-# For the data, we decided to remove all variables that were deemed unecessary, turn all the remaining categorical variables into factors,
-# remove missing values, and change the output variable into something more human friendly (low-risk and high-risk).
+#
+# For the data, we decided to remove all variables that were deemed unecessary, 
+# turn all the remaining categorical variables into factors, remove missing values, 
+# and change the output variable into something more human friendly (low-risk and high-risk).
+#
+#-----------------------------------------------------------------------------
 
 # Data importing
 credit <- read.csv("credit_2.csv", header = TRUE)
@@ -63,10 +69,18 @@ credit_filtered $REG_CITY_NOT_WORK_CITY <- as.factor(credit_filtered $REG_CITY_N
 str(credit_filtered)
 names(credit_filtered)
 
-# Training validation split -------------------------------------------------------
-# For the training of our model, we decided to use a decision tree. 
+# Training validation split & Classification Tree -------------------------------------------------------
+#
+# For the training of our model, we decided to use a decision tree, because it can show us
+# what variables the model thinks are important when predicting a customer
 # As for the actual training, we used the favorite seed number, and a 60/40 training/validation split.
+# This means that 60% of the data is used to train the model, while 40% is used for validating whether
+# the model is still good when used on an unfamiliar set of data.
+# Since the majority of customers are low-risk, we will also need to balance the data.
+#
+#--------------------------------------------------------------------------------------------------------
 
+# Setting seed & creating training & validation set 
 set.seed(666)
 train_index <- sample(1:nrow(credit_filtered), 0.6 * nrow(credit_filtered))
 valid_index <- setdiff(1:nrow(credit_filtered), train_index)
@@ -79,16 +93,16 @@ valid_df <- credit_filtered[valid_index, ]
 nrow(train_df)
 nrow(valid_df)
 
-library(janitor)
 compare_df_cols(train_df, valid_df)
 
-library(ROSE)
+# Balancing the data
+
 train_df_balance <- ROSE(TARGET ~ ., data = train_df, seed = 666)$data
 
-# Classification Tree ------------------------------------------------------
+# Classification Tree
 par(mar=c(1,1,1,1))
 class_tr <- rpart(TARGET ~.,
-                  data = train_df_balance, method = "class", minbucket = 2 ,maxdepth = 3)
+                  data = train_df_balance, method = "class", minbucket = 2,maxdepth = 3)
 prp(class_tr, cex = 0.8, tweak = 1)
 
 # Confusion matrix
@@ -106,17 +120,27 @@ confusionMatrix(classTree_valid_pred , valid_df$TARGET,
 # ROC Curve
 ROSE::roc.curve(valid_df$TARGET, classTree_valid_pred)
 
-# Evaluation ------------------------------------------------------------
+# Evaluation ---------------------------------------------------------------------------
+#
+# The classification tree shows us that the model heavily relies on CNT_CHILDREN (The number of children the client has)
+# and CNT_FAM_MEMBERS (How many familly members the client has).
 # Accuracy is 0.6745, which means the model is 67.45% accurate at predicting in general 
 # Sensitivity is 0.355, which means the model is only 35.5% accurate when predicting the positive class (high-risk)
 # Specificity is 0.70194, which means the model is 70.19% accurate when predicting the negative class (low-risk)
 # Results from the validation matrix is very similar to the training, so we can see that there is little to no over-fitting here.
 # This means that our model will be fairly accurate across different sets of data.
-
+# From the ROC, we can see that the AUC is 0.517, which can use some improvements
+#
+# -------------------------------------------------------------------------------------
 
 # Predicting the new customers ---------------------------------------------
+#
+# This is where we use the new customers' information and predict whether
+# they are low-risk or high-risk customers
+#
+#--------------------------------------------------------------------------
 
-# Create new customers profile
+# Creating new customers profile
 ID_250539 <- data.frame(NAME_CONTRACT_TYPE= "Cash loans",
                         CODE_GENDER = "F",FLAG_OWN_CAR="Y",FLAG_OWN_REALTY="Y",
                         CNT_CHILDREN = 0,AMT_INCOME_TOTAL = 112500, AMT_GOODS_PRICE = 202500,
@@ -157,6 +181,7 @@ ID_405632 <- data.frame(NAME_CONTRACT_TYPE= "Cash loans",
                         AMT_REQ_CREDIT_BUREAU_YEAR = 3)
 
 ## Converting all variables into factor
+
 ID_250539 $NAME_CONTRACT_TYPE  <- as.factor(ID_250539$NAME_CONTRACT_TYPE)
 ID_250539 $CODE_GENDER <- as.factor(ID_250539 $CODE_GENDER)
 ID_250539 $FLAG_OWN_CAR <- as.factor(ID_250539 $FLAG_OWN_CAR)
@@ -227,9 +252,14 @@ ID_420851_pred
 ID_405632_pred <- predict(class_tr, newdata = ID_405632)
 ID_405632_pred
 
-# Discussion ------------------------------------------------------------
+# The model predicted 3 customers as low-risk, and 2 customers as high-risk
+
+# Discussion & Final Recommendation ------------------------------------------------------------
+#
 # Our final model was fairly accurate, as both the training and validation accuracy was fairly decent (67%)
+# However, The sensitivity, as well as the ROC curve has room for improvements.
+# Overall, we feel that the model is decent and can be used in real-world situations.
+#
+#---------------------------------------------------------------------------------------------
 
-
-# Final Recommendation --------------------------------------------------
 
