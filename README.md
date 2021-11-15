@@ -1,1 +1,1 @@
-# 4310-Project-2
+# BUAN 4310 Project 2
