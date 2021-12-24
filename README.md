@@ -1,4 +1,4 @@
-# BUAN 4310 Project 2
+# BUAN 4310 Project 2: Predicting credit risk 
 
 ## Problem 2 Stark Inc. Introduction:
 After Steve Rogers replaced the Infinity Stones, Stark Enterprises has branched into the financial industry.
